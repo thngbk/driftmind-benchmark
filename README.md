@@ -64,9 +64,12 @@ benchmark/
 └── source_data/             # Raw input signal files
 
 src/
-├── t_arima.py                   # Triggered ARIMA (reactive re-fitting)
-├── f_arima.py                   # Frozen ARIMA (state-only updates)
-└── lstm_baseline.py             # LSTM baseline (deep learning approach)
+├── arima/
+│   ├── f_arima.py              # Frozen ARIMA (state-only updates)
+│   ├── t_arima.py              # Triggered ARIMA (reactive re-fitting)
+│   └── s_arima.py              # (Optional) Static/Standard ARIMA variant (describe what “s” means)
+└── lstm/
+    └── lstm.py                 # LSTM baseline (deep learning approach)
 
 ```
 
