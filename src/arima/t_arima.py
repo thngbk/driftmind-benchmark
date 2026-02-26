@@ -1,4 +1,4 @@
-import warningsgetCandidate
+import warnings
 import time
 from statsmodels.tsa.arima.model import ARIMA
 
