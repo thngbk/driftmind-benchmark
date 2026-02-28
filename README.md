@@ -1,4 +1,9 @@
-# DriftMind Benchmark Suite
+# driftmind-benchmark
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-alpha-orange.svg)](#current-limitations)
 
 An open-source, evolving benchmarking framework for real-time signal monitoring, forecasting, and drift-aware analytics.
 This repository focuses on systematic, reproducible evaluation of DriftMind against classical and modern baselines under non-stationary conditions.
@@ -32,6 +37,80 @@ Unlike static or batch-trained models, DriftMind continuously adapts to shifting
 
 ---
 
+## Installation
+
+Dependencies are managed with [uv](https://docs.astral.sh/uv/).
+
+```bash
+# Core dependencies only (ARIMA models)
+uv sync
+
+# Include lstm dependencies (required for lstm.py)
+uv sync --extra lstm
+
+# Include demo dependencies (JupyterLab, pandas, matplotlib, seaborn, tqdm — required to run the notebook)
+uv sync --extra demo
+
+# Everything
+uv sync --extra lstm --extra demo
+
+# Development tools (pytest, ruff)
+uv sync --extra dev
+```
+
+## Model implementations
+
+Four baseline forecasting strategies, each exposing a `predict_point(window)` interface for step-by-step online prediction:
+
+| Model               | File                   | Description                                                                                                        |
+|---------------------|------------------------|--------------------------------------------------------------------------------------------------------------------|
+| **Static ARIMA**    | `src/arima/s_arima.py` | Fits ARIMA once on a training block, then reuses the fixed coefficients for all future predictions.                |
+| **Frozen ARIMA**    | `src/arima/f_arima.py` | Fits once, then updates the Kalman Filter state with new observations — no parameter refit ever.                   |
+| **Triggered ARIMA** | `src/arima/t_arima.py` | Separates state updates from parameter fitting; re-fits only when explicitly triggered (e.g., on drift detection). |
+| **LSTM**            | `src/lstm/lstm.py`     | PyTorch LSTM neural network. Trains on an initial block of data, then does single-step inference point-by-point.   |
+
+All models measure per-prediction latency with `time.perf_counter()`.
+
+## Analysis notebook
+
+`benchmark/t_arima.ipynb` compares DriftMind API results against a baseline adaptive ARIMA. It has two phases:
+
+### Phase 1 — Aggregate analysis
+
+Loads pre-computed DriftMind results from `data/driftmind_results/analysis_results.csv` and produces:
+
+- A summary table grouped by **Category**: file count, average sMAE, average throughput (predictions/s), total points.
+- **Average sMAE by category** — normalised error (lower is better).
+- **Average throughput by category** — inference speed (higher is better).
+- **Volatility vs error scatter** — StdDev (log scale) vs sMAE by category; checks whether error degrades as signal variance grows.
+
+### Phase 2 — Per-experiment comparison: DriftMind vs adaptive ARIMA
+
+`visualize_experiment_full(id)` plots a single DriftMind experiment: actual signal, predicted trace, and absolute error over time.
+
+`benchmark_with_target(id)` runs an adaptive online ARIMA(5, 1, 0) on the same experiment using `TriggeredARIMABaseline` (`t_arima.py`) and produces a head-to-head comparison. Two drift-detection triggers control re-fitting:
+
+| Trigger          | Condition                                        | Action                               |
+|------------------|--------------------------------------------------|--------------------------------------|
+| MASE drift       | MASE > 3.0 for 20 consecutive steps              | Full re-fit on last 200 observations |
+| Structural drift | Pearson correlation < 0.20 (over last 100 steps) | Immediate re-fit                     |
+
+Results are printed (MAE, sMAE, throughput) and plotted as dual prediction traces with absolute error ribbons.
+
+### Data layout required to run the notebook
+
+```
+data/
+  driftmind_results/
+    analysis_results.csv          # One row per experiment (metadata + metrics)
+    experiments/
+      Experiment_<id>_<name>.csv  # Per-experiment predictions: Actual, Expected, AE columns
+```
+
+This data is produced by running the DriftMind API and is not included in this repository.
+
+---
+
 ## Scientific Fairness and Benchmarking Integrity
 
 This benchmark suite is designed with methodological rigor as a first-class concern.
@@ -51,9 +130,7 @@ This approach removes network latency from the equation and avoids artificially 
 
 ---
 
-## Repository Structure
-
-The project cleanly separates benchmark orchestration, data, and baseline implementations:
+## Repository structure
 
 ```text
 benchmark/
@@ -69,9 +146,52 @@ src/
 |   `-- s_arima.py              # Static/standard ARIMA baseline
 `-- lstm/
     `-- lstm.py                 # LSTM baseline (deep learning approach)
+
+images/benchmark/               # Result plots
+pyproject.toml                  # Package config
 ```
 
-Notebook names explicitly indicate the benchmark scenario and corresponding baselines under evaluation.
+---
+
+## Hyperparameters
+
+### Static ARIMA
+
+| Param   | Default   | Description                                      |
+|---------|-----------|--------------------------------------------------|
+| `order` | (5, 1, 0) | ARIMA (p, d, q) — AR lags, differencing, MA lags |
+
+### Frozen ARIMA
+
+| Param   | Default   | Description                                          |
+|---------|-----------|------------------------------------------------------|
+| `order` | (5, 1, 0) | ARIMA (p, d, q); parameters frozen after initial fit |
+
+### Triggered ARIMA
+
+| Param   | Default   | Description                                                    |
+|---------|-----------|----------------------------------------------------------------|
+| `order` | (5, 1, 0) | ARIMA (p, d, q); only re-fit when drift is detected externally |
+
+### LSTM
+
+| Param               | Default | Description                             |
+|---------------------|---------|-----------------------------------------|
+| `hidden_layer_size` | 64      | Number of LSTM hidden units             |
+| `seq_length`        | 50      | Input sequence length (lookback window) |
+| `epochs`            | 20      | Training epochs                         |
+| `learning_rate`     | 0.001   | Adam optimizer learning rate            |
+| `feature_range`     | (0, 1)  | MinMaxScaler output range               |
+
+### Benchmark settings (notebook)
+
+| Param                    | Value | Description                                               |
+|--------------------------|-------|-----------------------------------------------------------|
+| `training_fraction`      | 0.01  | Fraction of data used for initial model training          |
+| `arima_fit_window`       | 200   | Lookback window size fed to ARIMA models                  |
+| `mase_limit`             | 3.0   | MASE threshold to trigger re-fit                          |
+| `mase_consecutive_steps` | 20    | Consecutive steps above threshold before triggering       |
+| `corr_floor`             | 0.20  | Correlation floor; re-fit if correlation drops below this |
 
 ---
 
@@ -103,19 +223,25 @@ New baseline models are welcome (for example Prophet, Transformers, custom DSP, 
 
 ---
 
-## Getting Started
+## Current limitations
 
-1. Clone the repository.
-2. Install dependencies:
+- **No runnable pipeline.** The model implementations are standalone; there is no harness or runner script that executes them against a dataset and collects results.
+- **No datasets included.** Neither raw time-series data nor DriftMind API result files are committed to the repository. The notebook cannot be run without them.
 
-```bash
-pip install pandas numpy matplotlib seaborn torch statsmodels scikit-learn tqdm
-```
+## Results
 
-3. Open and run the notebooks in:
+### Dataset
+![Dataset](images/benchmark/dataset.png)
 
-```bash
-benchmark/*.ipynb
-```
+### Static ARIMA
+![Static ARIMA](images/benchmark/Static%20Arima.png)
 
-to reproduce baseline comparisons and analysis.
+### Rolling ARIMA
+![Rolling ARIMA](images/benchmark/Rolling%20Arima.png)
+
+### LSTM
+![LSTM](images/benchmark/LSTM.png)
+
+## License
+
+[MIT](LICENSE)
