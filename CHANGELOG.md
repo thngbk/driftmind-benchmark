@@ -37,7 +37,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Documentation
 
 - Added `CHANGELOG.md` (this file).
-- `README.md`: major rewrite — added version/license/status badges; Installation section with `uv sync` commands for each optional group; Model implementations table; Analysis notebook walkthrough with drift-trigger condition table; Hyperparameters tables for all models and the benchmark notebook; Current limitations section; Results section with image references; and a License section.
+- `README.md`: major rewrite — added version/license/status badges; Installation section with `uv sync` commands for each optional group; Model implementations table; Usage section with two-phase lifecycle example; Analysis notebook walkthrough with drift-trigger condition table and corrected data layout path (`benchmark/data/`) and filename pattern; Hyperparameters tables for all models and the benchmark notebook; Current limitations section; Documentation section with pre-rendered notebook link and regeneration instructions; and a License section.
+- Added `docs/t_arima.md`: pre-rendered export of `benchmark/t_arima.ipynb` including all output plots, generated via `nbconvert`.
+- Added `docs/images/`: plots extracted from the notebook export (aggregate analysis charts and head-to-head comparison).
+- Removed `images/` — static artefacts with no traceable source in the repository.
 
 ## [0.1.0] - 2026-02-25
 

@@ -71,6 +71,36 @@ Four baseline forecasting strategies, each exposing a `predict_point(window)` in
 
 All models measure per-prediction latency with `time.perf_counter()`.
 
+## Usage
+
+Every baseline follows the same two-phase lifecycle, making them interchangeable in the benchmark loop:
+
+```python
+import numpy as np
+from arima.s_arima import StaticARIMABaseline  # or any other baseline
+
+signal = np.load("my_signal.npy")
+
+# Phase 1 — warm-up: fit the model on an initial block of data
+warmup_fraction = 0.01
+warmup_end = int(len(signal) * warmup_fraction)
+
+model = StaticARIMABaseline(order=(5, 1, 0))
+model.train(signal[:warmup_end])
+
+# Phase 2 — streaming: slide a window and predict one step at a time
+window_size = 200
+predictions, latencies = [], []
+
+for i in range(warmup_end, len(signal)):
+    window = signal[max(0, i - window_size):i]
+    yhat, latency = model.predict_point(window)
+    predictions.append(yhat)
+    latencies.append(latency)
+```
+
+`train()` must be called before `predict_point()`; all models raise `RuntimeError` otherwise. `TriggeredARIMABaseline` additionally exposes `train()` as a public method so an external drift detector can call it again at any point during streaming to re-fit the model on the latest window.
+
 ## Analysis notebook
 
 `benchmark/t_arima.ipynb` compares DriftMind API results against a baseline adaptive ARIMA. It has two phases:
@@ -99,15 +129,15 @@ Results are printed (MAE, sMAE, throughput) and plotted as dual prediction trace
 
 ### Data layout required to run the notebook
 
-```
-data/
-  driftmind_results/
-    analysis_results.csv          # One row per experiment (metadata + metrics)
-    experiments/
-      Experiment_<id>_<name>.csv  # Per-experiment predictions: Actual, Expected, AE columns
-```
+All result files are committed under `benchmark/data/` and are ready to use:
 
-This data is produced by running the DriftMind API and is not included in this repository.
+```
+benchmark/data/
+  driftmind_results/
+    analysis_results.csv                                    # One row per experiment (metadata + metrics)
+    experiments/
+      Experiment_<id>_<name>_Report.csv                     # Per-experiment predictions: Actual, Expected, AE columns
+```
 
 ---
 
@@ -226,21 +256,19 @@ New baseline models are welcome (for example Prophet, Transformers, custom DSP, 
 ## Current limitations
 
 - **No runnable pipeline.** The model implementations are standalone; there is no harness or runner script that executes them against a dataset and collects results.
-- **No datasets included.** Neither raw time-series data nor DriftMind API result files are committed to the repository. The notebook cannot be run without them.
 
-## Results
+## Documentation
 
-### Dataset
-![Dataset](images/benchmark/dataset.png)
+A pre-rendered version of the analysis notebook — including all output plots — is available at [`docs/t_arima.md`](docs/t_arima.md).
 
-### Static ARIMA
-![Static ARIMA](images/benchmark/Static%20Arima.png)
+To regenerate it after a new run:
 
-### Rolling ARIMA
-![Rolling ARIMA](images/benchmark/Rolling%20Arima.png)
-
-### LSTM
-![LSTM](images/benchmark/LSTM.png)
+```bash
+uv sync --extra demo
+uv run jupyter nbconvert --to markdown benchmark/t_arima.ipynb --output-dir docs/
+mv docs/t_arima_files/* docs/images/
+rmdir docs/t_arima_files
+```
 
 ## License
 
