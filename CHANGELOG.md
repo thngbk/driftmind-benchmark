@@ -26,11 +26,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - All three ARIMA baselines: added a `_SUPPRESSED = (ConvergenceWarning, UserWarning)` class-level constant and a `_check_window()` helper that validates the input window length against the minimum observations required by the configured `ARIMA(p, d, q)` order, raising a descriptive `ValueError` on violation.
 - All source files: removed unused `numpy` and `pandas` imports from the ARIMA modules; imports reordered to comply with isort conventions (stdlib → third-party, alphabetically within each group).
 - `LSTMBaseline`: unused training-loop variable renamed from `i` to `_i`.
-- `benchmark/t_arima.ipynb`: imports reordered (stdlib → third-party, alphabetical) and string literals standardised to double quotes; outputs and execution counts stripped.
+- `benchmark/t_arima.ipynb`: comprehensive code-quality pass — see details below.
+  - Imports reordered (stdlib → third-party, alphabetical) and string literals standardised to double quotes; outputs and execution counts stripped.
+  - Replaced `os`/`glob` with `pathlib.Path`; path constants `ANALYSIS_CSV` and `EXPERIMENTS_DIR` centralise the data layout; all three call sites updated.
+  - `benchmark_with_target`: `time.time()` → `time.perf_counter()` for higher-resolution timing.
+  - `adaptive_online_arima_benchmark`: removed two dead `np.std(...)` expressions; `or 1e-8` → `max(..., 1e-8)`; removed dead debug comment referencing undefined variable; fixed `avg MAe` → `Avg MAE`.
+  - Split into four cells (markdown + code per function); section numbering corrected (§5 engine, §6 orchestrator, §7 execution).
 
 ### Build
 
-- Added `pyproject.toml` defining project metadata, core dependencies (`numpy`, `statsmodels`), optional-dependency groups (`lstm`, `demo`, `dev`), `ruff` linting/formatting configuration, and `pytest` settings; requires Python ≥ 3.9.
+- Added `pyproject.toml` defining project metadata, core dependencies (`numpy`, `statsmodels`, `pandas`, `matplotlib`, `seaborn`, `tqdm`), optional-dependency groups (`notebook` for JupyterLab, `lstm`, `dev`), `ruff` linting/formatting configuration, and `pytest` settings; requires Python ≥ 3.9. Core dependencies cover everything needed to execute the benchmark notebook; `notebook` is only required when launching from a browser-based Jupyter server rather than an IDE.
 - Added `uv.lock` for reproducible dependency resolution via `uv`.
 - Added `.gitattributes`.
 - `nbstripout` added to `dev` dependencies and installed as a git filter; notebook outputs are stripped automatically on every commit.

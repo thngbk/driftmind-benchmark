@@ -42,19 +42,18 @@ Unlike static or batch-trained models, DriftMind continuously adapts to shifting
 Dependencies are managed with [uv](https://docs.astral.sh/uv/).
 
 ```bash
-# Core dependencies only (ARIMA models)
+# Standard install — includes everything needed to run the benchmark notebook
 uv sync
 
-# Include lstm dependencies (required for lstm.py)
+# Add JupyterLab — only required when running the notebook from a browser-based Jupyter server.
+# Skip this if you open notebooks directly in VS Code, PyCharm, or any other IDE with
+# built-in notebook support; those environments provide their own kernel launcher.
+uv sync --extra notebook
+
+# Add the LSTM baseline (PyTorch + scikit-learn)
 uv sync --extra lstm
 
-# Include demo dependencies (JupyterLab, pandas, matplotlib, seaborn, tqdm — required to run the notebook)
-uv sync --extra demo
-
-# Everything
-uv sync --extra lstm --extra demo
-
-# Development tools (pytest, ruff)
+# Development tools (pytest, ruff, nbstripout)
 uv sync --extra dev
 ```
 
@@ -177,7 +176,10 @@ src/
 `-- lstm/
     `-- lstm.py                 # LSTM baseline (deep learning approach)
 
-images/benchmark/               # Result plots
+docs/
+|-- t_arima.md                  # Pre-rendered notebook export (with plots)
+`-- images/                     # Plots extracted from the notebook export
+
 pyproject.toml                  # Package config
 ```
 
@@ -272,7 +274,7 @@ uv run nbstripout --install --attributes .gitattributes
 To regenerate the docs after a new run:
 
 ```bash
-uv sync --extra demo
+uv sync --extra notebook
 uv run jupyter nbconvert --to markdown benchmark/t_arima.ipynb --output-dir docs/
 mv docs/t_arima_files/* docs/images/
 rmdir docs/t_arima_files
