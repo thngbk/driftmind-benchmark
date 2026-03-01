@@ -39,22 +39,30 @@ Unlike static or batch-trained models, DriftMind continuously adapts to shifting
 
 ## Installation
 
-Dependencies are managed with [uv](https://docs.astral.sh/uv/).
+**With [uv](https://docs.astral.sh/uv/) (recommended):**
 
 ```bash
-# Standard install — includes everything needed to run the benchmark notebook
+# Standard install — includes everything needed to run the benchmark notebook.
+# Developer tools (ruff, nbstripout) are included automatically.
 uv sync
-
-# Add JupyterLab — only required when running the notebook from a browser-based Jupyter server.
-# Skip this if you open notebooks directly in VS Code, PyCharm, or any other IDE with
-# built-in notebook support; those environments provide their own kernel launcher.
-uv sync --extra notebook
 
 # Add the LSTM baseline (PyTorch + scikit-learn)
 uv sync --extra lstm
+```
 
-# Development tools (pytest, ruff, nbstripout)
-uv sync --extra dev
+JupyterLab is not bundled as a dependency because most IDEs (VS Code, PyCharm, etc.) provide their own notebook kernel. If you need a standalone browser-based Jupyter server, add it manually:
+
+```bash
+uv add jupyterlab
+```
+
+**With pip:**
+
+```bash
+python -m pip install -e .
+
+# LSTM baseline (optional)
+python -m pip install -e ".[lstm]"
 ```
 
 ## Model implementations
@@ -102,7 +110,7 @@ for i in range(warmup_end, len(signal)):
 
 ## Analysis notebook
 
-`benchmark/t_arima.ipynb` compares DriftMind API results against a baseline adaptive ARIMA. It has two phases:
+`benchmark/t_arima.ipynb` compares DriftMind API results against the **Triggered ARIMA** baseline (`TriggeredARIMABaseline`, `src/arima/t_arima.py`) — the variant that re-fits its parameters only when a drift trigger fires. Any of the other implementations in `src/` (`StaticARIMABaseline`, `FrozenARIMABaseline`, `LSTMBaseline`) can be swapped in directly, as they all share the same `train()` / `predict_point()` interface. It has two phases:
 
 ### Phase 1 — Aggregate analysis
 
@@ -113,7 +121,7 @@ Loads pre-computed DriftMind results from `data/driftmind_results/analysis_resul
 - **Average throughput by category** — inference speed (higher is better).
 - **Volatility vs error scatter** — StdDev (log scale) vs sMAE by category; checks whether error degrades as signal variance grows.
 
-### Phase 2 — Per-experiment comparison: DriftMind vs adaptive ARIMA
+### Phase 2 — Per-experiment comparison: DriftMind vs Triggered ARIMA
 
 `visualize_experiment_full(id)` plots a single DriftMind experiment: actual signal, predicted trace, and absolute error over time.
 
@@ -274,7 +282,6 @@ uv run nbstripout --install --attributes .gitattributes
 To regenerate the docs after a new run:
 
 ```bash
-uv sync --extra notebook
 uv run jupyter nbconvert --to markdown benchmark/t_arima.ipynb --output-dir docs/
 mv docs/t_arima_files/* docs/images/
 rmdir docs/t_arima_files

@@ -35,15 +35,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Build
 
-- Added `pyproject.toml` defining project metadata, core dependencies (`numpy`, `statsmodels`, `pandas`, `matplotlib`, `seaborn`, `tqdm`), optional-dependency groups (`notebook` for JupyterLab, `lstm`, `dev`), `ruff` linting/formatting configuration, and `pytest` settings; requires Python ≥ 3.9. Core dependencies cover everything needed to execute the benchmark notebook; `notebook` is only required when launching from a browser-based Jupyter server rather than an IDE.
+- Added `pyproject.toml` defining project metadata, core dependencies (`numpy`, `statsmodels`, `pandas`, `matplotlib`, `seaborn`, `tqdm`), one optional group (`lstm`), `ruff` configuration, and a `[dependency-groups] dev` section (`ruff`, `nbstripout`); requires Python ≥ 3.9. `uv sync` is sufficient to run the benchmark notebook; JupyterLab is not bundled (add it on demand with `uv add jupyterlab`).
 - Added `uv.lock` for reproducible dependency resolution via `uv`.
 - Added `.gitattributes`.
-- `nbstripout` added to `dev` dependencies and installed as a git filter; notebook outputs are stripped automatically on every commit.
+- `nbstripout` added to `[dependency-groups] dev` and installed as a git filter; notebook outputs are stripped automatically on every commit.
 
 ### Documentation
 
 - Added `CHANGELOG.md` (this file).
-- `README.md`: major rewrite — added version/license/status badges; Installation section with `uv sync` commands for each optional group; Model implementations table; Usage section with two-phase lifecycle example; Analysis notebook walkthrough with drift-trigger condition table and corrected data layout path (`benchmark/data/`) and filename pattern; Hyperparameters tables for all models and the benchmark notebook; Current limitations section; Documentation section with pre-rendered notebook link and regeneration instructions; and a License section.
+- `README.md`: major rewrite — added version/license/status badges; Installation section (`uv sync` for the standard install, `uv sync --extra lstm` for the LSTM baseline, `uv add jupyterlab` note for browser-based Jupyter); Model implementations table; Usage section with two-phase lifecycle example; Analysis notebook walkthrough with drift-trigger condition table and corrected data layout path (`benchmark/data/`) and filename pattern; Hyperparameters tables for all models and the benchmark notebook; Current limitations section; Documentation section with pre-rendered notebook link and regeneration instructions; and a License section.
 - Added `docs/t_arima.md`: pre-rendered export of `benchmark/t_arima.ipynb` including all output plots, generated via `nbconvert`.
 - Added `docs/images/`: plots extracted from the notebook export (aggregate analysis charts and head-to-head comparison).
 - Removed `images/` — static artefacts with no traceable source in the repository.
