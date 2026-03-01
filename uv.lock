@@ -1052,6 +1052,8 @@ demo = [
     { name = "tqdm" },
 ]
 dev = [
+    { name = "nbstripout", version = "0.8.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "nbstripout", version = "0.9.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "pytest-cov" },
@@ -1069,6 +1071,7 @@ lstm = [
 requires-dist = [
     { name = "jupyterlab", marker = "extra == 'demo'", specifier = ">=4.0.0" },
     { name = "matplotlib", marker = "extra == 'demo'", specifier = ">=3.7.5" },
+    { name = "nbstripout", marker = "extra == 'dev'", specifier = ">=0.8.2" },
     { name = "numpy", specifier = ">=1.24.4" },
     { name = "pandas", marker = "extra == 'demo'", specifier = ">=2.0.3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
@@ -2560,6 +2563,45 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/6d/fd/91545e604bc3dad7dca9ed03284086039b294c6b3d75c0d2fa45f9e9caf3/nbformat-5.10.4.tar.gz", hash = "sha256:322168b14f937a5d11362988ecac2a4952d3d8e3a2cbeb2319584631226d5b3a", size = 142749, upload-time = "2024-04-04T11:20:37.371Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a9/82/0340caa499416c78e5d8f5f05947ae4bc3cba53c9f038ab6e9ed964e22f1/nbformat-5.10.4-py3-none-any.whl", hash = "sha256:3b48d6c8fbca4b299bf3982ea7db1af21580e4fec269ad087b9e81588891200b", size = 78454, upload-time = "2024-04-04T11:20:34.895Z" },
+]
+
+[[package]]
+name = "nbstripout"
+version = "0.8.2"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.10'",
+]
+dependencies = [
+    { name = "nbformat", marker = "python_full_version < '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/95/09/cea5360a0788f94337d1b65c313ff0a448fb6a444b65cab89378eb8f7d5c/nbstripout-0.8.2.tar.gz", hash = "sha256:2876530eb684bf93a5b48fe6d92b2163f78d040721c76b37d5b9e1514d38fc69", size = 27747, upload-time = "2025-11-16T17:38:55.6Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/e5/838eb1004fb9b6f0383c47c0d902eb698fda052e8e64ca48c70a2144a48c/nbstripout-0.8.2-py2.py3-none-any.whl", hash = "sha256:5f06f9138cb64daed3e91c5359ff0fff85bab4d0db7d72723be1da6f51b890ae", size = 17122, upload-time = "2025-11-16T17:38:54.164Z" },
+]
+
+[[package]]
+name = "nbstripout"
+version = "0.9.1"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.14' and sys_platform == 'win32'",
+    "python_full_version >= '3.14' and sys_platform == 'emscripten'",
+    "python_full_version >= '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
+    "python_full_version == '3.11.*' and sys_platform == 'win32'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'emscripten'",
+    "python_full_version == '3.11.*' and sys_platform == 'emscripten'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+    "python_full_version == '3.11.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+    "python_full_version == '3.10.*'",
+]
+dependencies = [
+    { name = "nbformat", marker = "python_full_version >= '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f9/6f/b52c4da26babeb521078c08c78c3187a59197098ffc7a70b0fe76851813a/nbstripout-0.9.1.tar.gz", hash = "sha256:313bbb4217c8e38998567e5d790b6bd6c3a17a8c39073b205b84dadfc5d756dc", size = 32356, upload-time = "2026-02-21T16:19:55.975Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/20/16/e777eadfa0c0305878c36fae1d5e6db474fbb15dae202b9ec378809dfb4d/nbstripout-0.9.1-py3-none-any.whl", hash = "sha256:ca027ee45742ee77e4f8e9080254f9a707f1161ba11367b82fdf4a29892c759e", size = 19136, upload-time = "2026-02-21T16:19:54.868Z" },
 ]
 
 [[package]]

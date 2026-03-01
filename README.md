@@ -261,7 +261,15 @@ New baseline models are welcome (for example Prophet, Transformers, custom DSP, 
 
 A pre-rendered version of the analysis notebook — including all output plots — is available at [`docs/t_arima.md`](docs/t_arima.md).
 
-To regenerate it after a new run:
+[`nbstripout`](https://github.com/kynan/nbstripout) is installed as a git filter for this repository. Notebook outputs are stripped automatically on every commit, keeping diffs readable. The `docs/` export is the intended way to share rendered results.
+
+After cloning, run once to activate the filter locally:
+
+```bash
+uv run nbstripout --install --attributes .gitattributes
+```
+
+To regenerate the docs after a new run:
 
 ```bash
 uv sync --extra demo
