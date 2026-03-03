@@ -35,3 +35,9 @@ dist/
 # Environment files
 .env
 **/.env
+
+# Temporary agent working files
+.tmp/
+
+# Claude Code
+.claude/
