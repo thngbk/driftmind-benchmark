@@ -2,7 +2,6 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-alpha-orange.svg)](#current-limitations)
 
 An open-source, evolving benchmarking framework for real-time signal monitoring, forecasting, and drift-aware analytics.
